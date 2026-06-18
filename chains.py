@@ -5,7 +5,7 @@ from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 
-from schemas import AnswerQuestion
+from schemas import AnswerQuestion, ReviseAnswer
 
 load_dotenv()
 
@@ -32,7 +32,7 @@ first_responder_prompt_template = first_responder_prompt.partial(
     first_instruction="Provide a detailed ~250 words answer"
 )
 
-first_responder_chain = first_responder_prompt_template | llm.bind_tools(tools=[AnswerQuestion], tool_choice="AnswerQuestion") | parser_pydantic
+first_responder_chain = first_responder_prompt_template | llm.bind_tools(tools=[AnswerQuestion], tool_choice="AnswerQuestion")
 
 
 # chain = prompt | llm.with_structured_output(AnswerQuestion)
@@ -69,3 +69,8 @@ revise_instructions = """Revise your previous answer using the new information.
 
 # this will get plugged into first_intruction
 
+reviser_prompt_template = first_responder_prompt.partial(
+    first_instruction=revise_instructions
+)
+
+revisor_chain = reviser_prompt_template | llm.bind_tools(tools=[ReviseAnswer], tool_choice="ReviseAnswer")
